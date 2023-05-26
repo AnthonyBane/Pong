@@ -1,130 +1,354 @@
+"""This module contains the classes and functionality to run a basic version of the Pong video game 
+   """
+__version__ = "2.0"
+
 import pygame
 
-pygame.init()
-window = pygame.display.set_mode((600, 400))
+# Defining window size
+WINDOW_WIDTH = 600
+WINDOW_HEIGHT = 400
 
-run = True
+# Defining colour tuples in RGB
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
+# Game limiting FPS
+FPS_LIMIT = 60
+
+# Paddle size
+PADDLE_HEIGHT = 100
+PADDLE_WIDTH = 20
+
+# Score to reach
+MAX_SCORE = 5
+
+# Game window and name
+GAME_WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Pong")
 
-clock = pygame.time.Clock()
 
-paddle_1 = {"x": 10, "y": 175, "width": 10, "height": 100, "color": (255, 255, 255)}
+class Paddle:
+    """Paddle class used to create paddles for the pong game."""
 
-paddle_2 = {"x": 580, "y": 175, "width": 10, "height": 100, "color": (255, 255, 255)}
+    def __init__(
+        self, x_position, y_position, width, height, colour=WHITE, paddle_velocity=4
+    ) -> None:
+        """Paddle class init.
 
-ball = {"x": 300, "y": 200, "radius": 5, "x_velocity": -5, "y_velocity": 0, "colour": (0, 255, 0)}
+        Args:
+            x_position (int): current x position
+            y_position (int): current y position
+            width (int): width in pixels
+            height (int): height in pixels
+            colour (tuple, optional): paddle fill colour
+            paddle_velocity (int, optional): paddle velocity. Defaults to 4.
+        """
+        self.x_position = x_position
+        self.y_position = self.y_position_original = y_position
+        self.width = width
+        self.height = height
+        self.colour = colour
+        self.paddle_velocity = paddle_velocity
 
-score_one = 0
-score_two = 0
+    def move(self, up=True):
+        """Changes the paddle's xy positions.
 
-while run:
-    clock.tick(60)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-            break
+        Args:
+            up (bool): Signals whether to add or remove the y velocity. Defaults to True.
+        """
+        if up:
+            self.y_position += self.paddle_velocity
+        else:
+            self.y_position -= self.paddle_velocity
 
-    keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_w] and paddle_1["y"] >= 0:
-        paddle_1["y"] -= 5
-    if keys[pygame.K_s] and paddle_1["y"] <= 400 - paddle_1["height"]:
-        paddle_1["y"] += 5
+class Ball:
+    """Ball class used to create a ball for the ball game."""
 
-    if keys[pygame.K_UP] and paddle_2["y"] >= 0:
-        paddle_2["y"] -= 5
-    if keys[pygame.K_DOWN] and paddle_2["y"] <= 400 - paddle_2["height"]:
-        paddle_2["y"] += 5
+    def __init__(
+        self,
+        x_position: int,
+        y_position: int,
+        radius: int,
+        x_velocity: int = 5,
+        y_velocity: int = 0,
+        colour: tuple = WHITE,
+        max_velocity: int = 5,
+    ) -> None:
+        """Ball class init.
 
-    ball["x"] += ball["x_velocity"]
-    ball["y"] += ball["y_velocity"]
+        Args:
+            x_position (int): current x position.
+            y_position (int): current y position.
+            radius (int): ball radius in pixels.
+            x_velocity (int, optional): x velocity. Defaults to 5.
+            y_velocity (int, optional): y velocity. Defaults to 0.
+            colour (tuple, optional): ball colour fill. Defaults to WHITE.
+            max_velocity (int, optional): max potential velocity. Defaults to 5.
+        """
+        self.x_position = self.x_position_original = x_position
+        self.y_position = self.y_position_original = y_position
+        self.radius = radius
+        self.x_velocity = x_velocity
+        self.y_velocity = y_velocity
+        self.max_velocity = max_velocity
+        self.colour = colour
 
-    if ball["y"] <= 0 + ball["radius"]:
-        ball["y_velocity"] *= -1
-    if ball["y"] >= 400 - ball["radius"]:
-        ball["y_velocity"] *= -1
 
-    if ball["y"] >= paddle_1["y"] and ball["y"] <= paddle_1["y"] + paddle_1["height"]:
-        if ball["x"] - ball["radius"] <= paddle_1["x"] + paddle_1["width"]:
-            ball["x_velocity"] *= -1
-            if ball["y"] <= paddle_1["y"] + (paddle_1["height"] // 2):
-                difference = (paddle_1["y"] + (paddle_1["height"] // 2)) - ball["y"]
-                reduction = (paddle_1["height"] / 2) / 4
-                ball["y_velocity"] = (difference / reduction) * -1
-            else:
-                difference = (paddle_1["y"] + (paddle_1["height"] // 2)) - ball["y"]
-                reduction = (paddle_1["height"]) / 4
-                ball["y_velocity"] = (difference / reduction) * -1
+class Player:
+    def __init__(self, name: str) -> None:
+        """Player class init
 
-    if ball["y"] >= paddle_2["y"] and ball["y"] <= paddle_2["y"] + paddle_2["height"]:
-        if ball["x"] + ball["radius"] >= paddle_2["x"]:
-            ball["x_velocity"] *= -1
-            if ball["y"] <= paddle_2["y"] + (paddle_2["height"] // 2):
-                difference = (paddle_2["y"] + (paddle_2["height"] // 2)) - ball["y"]
-                reduction = (paddle_2["height"] / 2) / 4
-                ball["y_velocity"] = (difference / reduction) * -1
-            else:
-                difference = (paddle_2["y"] + (paddle_2["height"] // 2)) - ball["y"]
-                reduction = (paddle_2["height"]) / 4
-                ball["y_velocity"] = (difference / reduction) * -1
+        Args:
+            name (str): The player's name.
+        """
+        self.score = 0
+        self.name = name
 
-    window.fill((0, 0, 0))
-    pygame.draw.rect(
-        window,
-        paddle_1["color"],
-        (paddle_1["x"], paddle_1["y"], paddle_1["width"], paddle_1["height"]),
-    )
-    pygame.draw.rect(
-        window,
-        paddle_2["color"],
-        (paddle_2["x"], paddle_2["y"], paddle_2["width"], paddle_2["height"]),
-    )
 
-    if ball["x"] < 0:
-        score_two += 1
-        ball["x"] = 300
-        ball["y"] = 200
-        ball["x_velocity"] *= -1
-        ball["y_velocity"] = 0
+class Pong:
+    def __init__(
+        self, player_one_name: str = "Player 1", player_two_name: str = "Player 2"
+    ) -> None:
+        """Pong game class init.
 
-    elif ball["x"] > 600:
-        score_one += 1
-        ball["x"] = 300
-        ball["y"] = 200
-        ball["x_velocity"] *= -1
-        ball["y_velocity"] = 0
+        Args:
+            player_one_name (str, optional): Player one's name. Defaults to "Player 1".
+            player_two_name (str, optional): Player two's name. Defaults to "Player 2".
+        """
+        pygame.init()
+        self.clock = pygame.time.Clock()
+        self.game_font = pygame.font.SysFont("Britannic", 50)
 
-    font = pygame.font.SysFont("comicsans", 50)
+        self.paddle_left = Paddle(
+            x_position=10,
+            y_position=WINDOW_HEIGHT // 2 - PADDLE_HEIGHT // 2,
+            width=PADDLE_WIDTH,
+            height=PADDLE_HEIGHT,
+            colour=WHITE,
+        )
+        self.paddle_right = Paddle(
+            x_position=WINDOW_WIDTH - PADDLE_WIDTH - 10,
+            y_position=WINDOW_HEIGHT // 2 - PADDLE_HEIGHT // 2,
+            width=PADDLE_WIDTH,
+            height=PADDLE_HEIGHT,
+            colour=WHITE,
+        )
+        self.ball = Ball(
+            x_position=WINDOW_WIDTH // 2,
+            y_position=WINDOW_HEIGHT // 2,
+            radius=5,
+            x_velocity=5,
+            y_velocity=0,
+            colour=WHITE,
+        )
 
-    if score_one >= 5:
-        winning_text = "Left player won"
-        text_to_write = font.render(winning_text, 1, (255, 255, 255))
+        self.player_one = Player(name=player_one_name)
+        self.player_two = Player(name=player_two_name)
+
+    def move_paddle(self, keys):
+        """Handles paddle movement
+
+        Args:
+            keys (pygame.key.ScancodeWrapper): A list of key presses.
+        """
+
+        print(type(keys))
+        if keys[pygame.K_w] and self.paddle_left.y_position >= 0:
+            self.paddle_left.y_position -= 5
+        if (
+            keys[pygame.K_s]
+            and self.paddle_left.y_position <= WINDOW_HEIGHT - self.paddle_left.height
+        ):
+            self.paddle_left.y_position += 5
+
+        if keys[pygame.K_UP] and self.paddle_right.y_position >= 0:
+            self.paddle_right.y_position -= 5
+        if (
+            keys[pygame.K_DOWN]
+            and self.paddle_right.y_position <= WINDOW_HEIGHT - self.paddle_right.height
+        ):
+            self.paddle_right.y_position += 5
+
+    def move_ball(self):
+        """Handles changes in ball velocity"""
+        self.ball.x_position += self.ball.x_velocity
+        self.ball.y_position += self.ball.y_velocity
+
+    def handle_paddle_collision(self):
+        """Handles ball collisions."""
+        if self.ball.y_position <= 0 + self.ball.radius:
+            self.ball.y_velocity *= -1
+        if self.ball.y_position >= WINDOW_HEIGHT - self.ball.radius:
+            self.ball.y_velocity *= -1
+
+        # TODO - refactor these code blocks
+        if (
+            self.ball.y_position >= self.paddle_left.y_position
+            and self.ball.y_position <= self.paddle_left.y_position + self.paddle_left.height
+        ):
+            if (
+                self.ball.x_position - self.ball.radius
+                <= self.paddle_left.x_position + self.paddle_left.width
+            ):
+                self.ball.x_velocity *= -1
+                if self.ball.y_position <= self.paddle_left.y_position + (
+                    self.paddle_left.height // 2
+                ):
+                    difference = (
+                        self.paddle_left.y_position + (self.paddle_left.height // 2)
+                    ) - self.ball.y_position
+                    reduction = (self.paddle_left.height / 2) / 4
+                    self.ball.y_velocity = (difference / reduction) * -1
+                else:
+                    difference = (
+                        self.paddle_left.y_position + (self.paddle_left.height // 2)
+                    ) - self.ball.y_position
+                    reduction = (self.paddle_left.height) / 4
+                    self.ball.y_velocity = (difference / reduction) * -1
+
+        if (
+            self.ball.y_position >= self.paddle_right.y_position
+            and self.ball.y_position <= self.paddle_right.y_position + self.paddle_right.height
+        ):
+            if self.ball.x_position + self.ball.radius >= self.paddle_right.x_position:
+                self.ball.x_velocity *= -1
+                if self.ball.y_position <= self.paddle_right.y_position + (
+                    self.paddle_right.height // 2
+                ):
+                    difference = (
+                        self.paddle_right.y_position + (self.paddle_right.height // 2)
+                    ) - self.ball.y_position
+                    reduction = (self.paddle_right.height / 2) / 4
+                    self.ball.y_velocity = (difference / reduction) * -1
+                else:
+                    difference = (
+                        self.paddle_right.y_position + (self.paddle_right.height // 2)
+                    ) - self.ball.y_position
+                    reduction = (self.paddle_right.height) / 4
+                    self.ball.y_velocity = (difference / reduction) * -1
+
+    def draw(self, window):
+        """Handles the drawing of visual elements to the game window
+
+        Args:
+            window (pygame.display): The Pong game window.
+        """
+        # Reset canvas
+        window.fill(BLACK)
+
+        # Draw the paddles
+        pygame.draw.rect(
+            window,
+            self.paddle_left.colour,
+            (
+                self.paddle_left.x_position,
+                self.paddle_left.y_position,
+                self.paddle_left.width,
+                self.paddle_left.height,
+            ),
+        )
+        pygame.draw.rect(
+            window,
+            self.paddle_right.colour,
+            (
+                self.paddle_right.x_position,
+                self.paddle_right.y_position,
+                self.paddle_right.width,
+                self.paddle_right.height,
+            ),
+        )
+
+        # Draws the scores
+        score_one_text = self.game_font.render(f"{self.player_one.score}", 1, WHITE)
+        score_two_text = self.game_font.render(f"{self.player_two.score}", 1, WHITE)
+        window.blit(score_one_text, (WINDOW_WIDTH // 4 - score_one_text.get_width() // 2, 20))
+        window.blit(score_two_text, (WINDOW_WIDTH * (3 / 4) - score_two_text.get_width() // 2, 20))
+
+        # Draw the ball
+        pygame.draw.circle(
+            window,
+            self.ball.colour,
+            (self.ball.x_position, self.ball.y_position),
+            self.ball.radius,
+        )
+
+        # Detect if there is a winner
+        if self.player_one.score >= MAX_SCORE or self.player_two.score >= MAX_SCORE:
+            self.winner(window)
+        else:
+            pygame.display.update()
+
+    def winner(self, window):
+        """Handles writing to the window and resetting the game if a winner is identified.
+
+        Args:
+            window (pygame.display): The Pong game window.
+        """
+
+        if self.player_one.score >= MAX_SCORE:
+            winning_text = f"{self.player_one.name} has won!"
+        elif self.player_two.score >= MAX_SCORE:
+            winning_text = f"{self.player_two.name} has won!"
+
+        text_to_write = self.game_font.render(winning_text, 1, WHITE)
+
         window.blit(
             text_to_write,
-            (600 // 2 - text_to_write.get_width() // 2, 200 - text_to_write.get_height() // 2),
+            (
+                WINDOW_WIDTH // 2 - text_to_write.get_width() // 2,
+                WINDOW_HEIGHT // 2 - text_to_write.get_height() // 2,
+            ),
         )
-        score_one = 0
+        self.player_one.score = 0
+        self.player_two.score = 0
         pygame.display.update()
-        pygame.time.delay(10000)
-    elif score_two >= 5:
-        winning_text = "Right player won"
-        text_to_write = font.render(winning_text, 1, (255, 255, 255))
-        window.blit(
-            text_to_write,
-            (600 // 2 - text_to_write.get_width() // 2, 200 - text_to_write.get_height() // 2),
-        )
-        pygame.display.update()
-        pygame.time.delay(10000)
-        score_two = 0
+        pygame.time.delay(5000)
 
-    score_one_text = font.render(f"{score_one}", 1, (255, 255, 255))
-    score_two_text = font.render(f"{score_two}", 1, (255, 255, 255))
+    def reset(self):
+        """Resets the paddle and ball positions as well as ball y_velocity. Ball x_velocity is not impacted."""
+        self.ball.x_position = self.ball.x_position_original
+        self.ball.y_position = self.ball.y_position_original
+        self.ball.y_velocity = 0
 
-    window.blit(score_one_text, (600 // 4 - score_one_text.get_width() // 2, 20))
-    window.blit(score_two_text, (600 * (3 / 4) - score_two_text.get_width() // 2, 20))
+        self.paddle_left.y_position = self.paddle_left.y_position_original
 
-    pygame.draw.circle(window, ball["colour"], (ball["x"], ball["y"]), ball["radius"])
+        self.paddle_right.y_position = self.paddle_right.y_position_original
 
-    pygame.display.update()
+    def goal(self):
+        if self.ball.x_position < 0:
+            self.player_two.score += 1
+            self.reset()
 
-pygame.quit()
+        elif self.ball.x_position > WINDOW_WIDTH:
+            self.player_one.score += 1
+            self.reset()
+
+    def run_game(self):
+        """Contains the game loop. Handles window closure."""
+        run = True
+        while run:
+            self.clock.tick(FPS_LIMIT)
+            self.draw(GAME_WINDOW)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                    break
+
+            keys = pygame.key.get_pressed()
+            self.move_paddle(keys)
+            self.move_ball()
+            self.handle_paddle_collision()
+            self.goal()
+
+        pygame.quit()
+
+
+def main():
+    """The entry point to the program"""
+    game = Pong()
+    game.run_game()
+
+
+if __name__ == "__main__":
+    main()
