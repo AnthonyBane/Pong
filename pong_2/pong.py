@@ -96,6 +96,8 @@ class Ball:
 
 
 class Player:
+    """Example Player class"""
+
     def __init__(self, name: str) -> None:
         """Player class init
 
@@ -107,6 +109,8 @@ class Player:
 
 
 class Pong:
+    """Pong game class handling game flow and logic"""
+
     def __init__(
         self, player_one_name: str = "Player 1", player_two_name: str = "Player 2"
     ) -> None:
@@ -153,7 +157,6 @@ class Pong:
             keys (pygame.key.ScancodeWrapper): A list of key presses.
         """
 
-        print(type(keys))
         if keys[pygame.K_w] and self.paddle_left.y_position >= 0:
             self.paddle_left.y_position -= 5
         if (
@@ -175,14 +178,29 @@ class Pong:
         self.ball.x_position += self.ball.x_velocity
         self.ball.y_position += self.ball.y_velocity
 
+    def calculate_return_y_velocity(self, paddle: Paddle, ball: Ball) -> int:
+        """Helper function to calculate y velocity after paddle collision
+
+        Args:
+            paddle (Paddle): paddle the ball hit
+            ball (Ball): the ball
+
+        Returns:
+            int: calculated y velocity
+        """
+        displacement_from_paddle = ball.y_position - (paddle.y_position + (paddle.height // 2))
+        reduction = (paddle.height // 2) / ball.max_velocity
+        y_velocity = displacement_from_paddle / reduction
+        return y_velocity
+
     def handle_paddle_collision(self):
         """Handles ball collisions."""
-        if self.ball.y_position <= 0 + self.ball.radius:
-            self.ball.y_velocity *= -1
-        if self.ball.y_position >= WINDOW_HEIGHT - self.ball.radius:
+        if (
+            self.ball.y_position <= 0 + self.ball.radius
+            or self.ball.y_position >= WINDOW_HEIGHT - self.ball.radius
+        ):
             self.ball.y_velocity *= -1
 
-        # TODO - refactor these code blocks
         if (
             self.ball.y_position >= self.paddle_left.y_position
             and self.ball.y_position <= self.paddle_left.y_position + self.paddle_left.height
@@ -192,20 +210,7 @@ class Pong:
                 <= self.paddle_left.x_position + self.paddle_left.width
             ):
                 self.ball.x_velocity *= -1
-                if self.ball.y_position <= self.paddle_left.y_position + (
-                    self.paddle_left.height // 2
-                ):
-                    difference = (
-                        self.paddle_left.y_position + (self.paddle_left.height // 2)
-                    ) - self.ball.y_position
-                    reduction = (self.paddle_left.height / 2) / 4
-                    self.ball.y_velocity = (difference / reduction) * -1
-                else:
-                    difference = (
-                        self.paddle_left.y_position + (self.paddle_left.height // 2)
-                    ) - self.ball.y_position
-                    reduction = (self.paddle_left.height) / 4
-                    self.ball.y_velocity = (difference / reduction) * -1
+                self.ball.y_velocity = self.calculate_return_y_velocity(self.paddle_left, self.ball)
 
         if (
             self.ball.y_position >= self.paddle_right.y_position
@@ -213,20 +218,9 @@ class Pong:
         ):
             if self.ball.x_position + self.ball.radius >= self.paddle_right.x_position:
                 self.ball.x_velocity *= -1
-                if self.ball.y_position <= self.paddle_right.y_position + (
-                    self.paddle_right.height // 2
-                ):
-                    difference = (
-                        self.paddle_right.y_position + (self.paddle_right.height // 2)
-                    ) - self.ball.y_position
-                    reduction = (self.paddle_right.height / 2) / 4
-                    self.ball.y_velocity = (difference / reduction) * -1
-                else:
-                    difference = (
-                        self.paddle_right.y_position + (self.paddle_right.height // 2)
-                    ) - self.ball.y_position
-                    reduction = (self.paddle_right.height) / 4
-                    self.ball.y_velocity = (difference / reduction) * -1
+                self.ball.y_velocity = self.calculate_return_y_velocity(
+                    self.paddle_right, self.ball
+                )
 
     def draw(self, window):
         """Handles the drawing of visual elements to the game window
@@ -292,7 +286,7 @@ class Pong:
             winning_text = f"{self.player_two.name} has won!"
 
         text_to_write = self.game_font.render(winning_text, 1, WHITE)
-
+        window.fill(BLACK)
         window.blit(
             text_to_write,
             (
@@ -316,6 +310,7 @@ class Pong:
         self.paddle_right.y_position = self.paddle_right.y_position_original
 
     def goal(self):
+        """Handles a goal outcome"""
         if self.ball.x_position < 0:
             self.player_two.score += 1
             self.reset()
