@@ -3,6 +3,7 @@
 __version__ = "2.0"
 
 import pygame
+from dataclasses import dataclass
 
 # Defining window size
 WINDOW_WIDTH = 600
@@ -95,17 +96,12 @@ class Ball:
         self.colour = colour
 
 
+@dataclass
 class Player:
     """Example Player class"""
 
-    def __init__(self, name: str) -> None:
-        """Player class init
-
-        Args:
-            name (str): The player's name.
-        """
-        self.score = 0
-        self.name = name
+    name: str
+    score: int = 0
 
 
 class Pong:
@@ -147,8 +143,8 @@ class Pong:
             colour=WHITE,
         )
 
-        self.player_one = Player(name=player_one_name)
-        self.player_two = Player(name=player_two_name)
+        self.player_one = Player(player_one_name, 0)
+        self.player_two = Player(player_two_name, 0)
 
     def move_paddle(self, keys):
         """Handles paddle movement
@@ -177,6 +173,12 @@ class Pong:
         """Handles changes in ball velocity"""
         self.ball.x_position += self.ball.x_velocity
         self.ball.y_position += self.ball.y_velocity
+
+    def get_paddles(self):
+        return [self.paddle_left, self.paddle_right]
+
+    def get_ball(self):
+        return self.ball
 
     def calculate_return_y_velocity(self, paddle: Paddle, ball: Ball) -> int:
         """Helper function to calculate y velocity after paddle collision
