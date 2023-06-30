@@ -3,6 +3,7 @@
 __version__ = "2.0"
 
 import pygame
+from logger_setup import logger
 from dataclasses import dataclass
 
 # Defining window size
@@ -31,9 +32,7 @@ pygame.display.set_caption("Pong")
 class Paddle:
     """Paddle class used to create paddles for the pong game."""
 
-    def __init__(
-        self, x_position, y_position, width, height, colour=WHITE, paddle_velocity=4
-    ) -> None:
+    def __init__(self, x_position, y_position, width, height, colour=WHITE, paddle_velocity=4) -> None:
         """Paddle class init.
 
         Args:
@@ -107,9 +106,7 @@ class Player:
 class Pong:
     """Pong game class handling game flow and logic"""
 
-    def __init__(
-        self, player_one_name: str = "Player 1", player_two_name: str = "Player 2"
-    ) -> None:
+    def __init__(self, player_one_name: str = "Player 1", player_two_name: str = "Player 2") -> None:
         """Pong game class init.
 
         Args:
@@ -155,18 +152,12 @@ class Pong:
 
         if keys[pygame.K_w] and self.paddle_left.y_position >= 0:
             self.paddle_left.y_position -= 5
-        if (
-            keys[pygame.K_s]
-            and self.paddle_left.y_position <= WINDOW_HEIGHT - self.paddle_left.height
-        ):
+        if keys[pygame.K_s] and self.paddle_left.y_position <= WINDOW_HEIGHT - self.paddle_left.height:
             self.paddle_left.y_position += 5
 
         if keys[pygame.K_UP] and self.paddle_right.y_position >= 0:
             self.paddle_right.y_position -= 5
-        if (
-            keys[pygame.K_DOWN]
-            and self.paddle_right.y_position <= WINDOW_HEIGHT - self.paddle_right.height
-        ):
+        if keys[pygame.K_DOWN] and self.paddle_right.y_position <= WINDOW_HEIGHT - self.paddle_right.height:
             self.paddle_right.y_position += 5
 
     def move_ball(self):
@@ -197,20 +188,14 @@ class Pong:
 
     def handle_paddle_collision(self):
         """Handles ball collisions."""
-        if (
-            self.ball.y_position <= 0 + self.ball.radius
-            or self.ball.y_position >= WINDOW_HEIGHT - self.ball.radius
-        ):
+        if self.ball.y_position <= 0 + self.ball.radius or self.ball.y_position >= WINDOW_HEIGHT - self.ball.radius:
             self.ball.y_velocity *= -1
 
         if (
             self.ball.y_position >= self.paddle_left.y_position
             and self.ball.y_position <= self.paddle_left.y_position + self.paddle_left.height
         ):
-            if (
-                self.ball.x_position - self.ball.radius
-                <= self.paddle_left.x_position + self.paddle_left.width
-            ):
+            if self.ball.x_position - self.ball.radius <= self.paddle_left.x_position + self.paddle_left.width:
                 self.ball.x_velocity *= -1
                 self.ball.y_velocity = self.calculate_return_y_velocity(self.paddle_left, self.ball)
 
@@ -220,9 +205,7 @@ class Pong:
         ):
             if self.ball.x_position + self.ball.radius >= self.paddle_right.x_position:
                 self.ball.x_velocity *= -1
-                self.ball.y_velocity = self.calculate_return_y_velocity(
-                    self.paddle_right, self.ball
-                )
+                self.ball.y_velocity = self.calculate_return_y_velocity(self.paddle_right, self.ball)
 
     def draw(self, window):
         """Handles the drawing of visual elements to the game window
@@ -259,7 +242,10 @@ class Pong:
         score_one_text = self.game_font.render(f"{self.player_one.score}", 1, WHITE)
         score_two_text = self.game_font.render(f"{self.player_two.score}", 1, WHITE)
         window.blit(score_one_text, (WINDOW_WIDTH // 4 - score_one_text.get_width() // 2, 20))
-        window.blit(score_two_text, (WINDOW_WIDTH * (3 / 4) - score_two_text.get_width() // 2, 20))
+        window.blit(
+            score_two_text,
+            (WINDOW_WIDTH * (3 / 4) - score_two_text.get_width() // 2, 20),
+        )
 
         # Draw the ball
         pygame.draw.circle(
@@ -341,8 +327,25 @@ class Pong:
         pygame.quit()
 
 
+def parse_args():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Python program", epilog="The end of the help section")
+    parser.add_argument("-d", "--debug", help="Runs the program in debug mode.", action="store_true")
+    args, unknown = parser.parse_known_args()
+    if args.debug:
+        import logging
+
+        logging.getLogger().setLevel(logging.DEBUG)
+        logger.debug("Running the program in debug mode.")
+    if unknown:
+        for arg in unknown:
+            logger.info("Unhandled argument %s" % arg)
+
+
 def main():
     """The entry point to the program"""
+    parse_args()
     game = Pong()
     game.run_game()
 
