@@ -330,7 +330,10 @@ class Pong:
 def parse_args():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Python program", epilog="The end of the help section")
+    parser = argparse.ArgumentParser(
+        description='Welcome to the Pong game. This is an example of a script "help" command that could be fleshed out further.',
+        epilog="This is the end of the help section.",
+    )
     parser.add_argument("-d", "--debug", help="Runs the program in debug mode.", action="store_true")
     args, unknown = parser.parse_known_args()
     if args.debug:
