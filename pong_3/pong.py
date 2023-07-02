@@ -1,16 +1,20 @@
 """This module contains the classes and functionality to run a basic version of the Pong video game 
    """
-__version__ = "2.0"
+__version__ = "3.0"
 
+# TODO - refactor constants to use config file or revert to defaults
+
+from dataclasses import dataclass
 import pygame
 from logger_setup import logger
-from dataclasses import dataclass
 
 # Defining window size
 WINDOW_WIDTH = 600
 WINDOW_HEIGHT = 400
+logger.info("Window set to width: %s, and height: %s", WINDOW_WIDTH, WINDOW_HEIGHT)
 
 # Defining colour tuples in RGB
+# TODO - refactor colours to ENUM
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
@@ -29,6 +33,7 @@ GAME_WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Pong")
 
 
+# TODO - add __str__ support
 class Paddle:
     """Paddle class used to create paddles for the pong game."""
 
@@ -62,6 +67,7 @@ class Paddle:
             self.y_position -= self.paddle_velocity
 
 
+# TODO - add __str__ support
 class Ball:
     """Ball class used to create a ball for the ball game."""
 
@@ -95,6 +101,7 @@ class Ball:
         self.colour = colour
 
 
+# TODO - add __str__ support
 @dataclass
 class Player:
     """Example Player class"""
@@ -113,6 +120,7 @@ class Pong:
             player_one_name (str, optional): Player one's name. Defaults to "Player 1".
             player_two_name (str, optional): Player two's name. Defaults to "Player 2".
         """
+        logger.info("Initializing Pong game.")
         pygame.init()
         self.clock = pygame.time.Clock()
         self.game_font = pygame.font.SysFont("Britannic", 50)
@@ -165,9 +173,11 @@ class Pong:
         self.ball.x_position += self.ball.x_velocity
         self.ball.y_position += self.ball.y_velocity
 
+    # TODO - add docstring
     def get_paddles(self):
         return [self.paddle_left, self.paddle_right]
 
+    # TODO - add docstring
     def get_ball(self):
         return self.ball
 
@@ -186,6 +196,8 @@ class Pong:
         y_velocity = displacement_from_paddle / reduction
         return y_velocity
 
+    # TODO - change to handle ball collision or separate paddle and ceiling collisions.
+    # TODO - refactor so that ball and paddle collisions happen at paddle borders instead of before/after paddle edges
     def handle_paddle_collision(self):
         """Handles ball collisions."""
         if self.ball.y_position <= 0 + self.ball.radius or self.ball.y_position >= WINDOW_HEIGHT - self.ball.radius:
@@ -213,6 +225,7 @@ class Pong:
         Args:
             window (pygame.display): The Pong game window.
         """
+
         # Reset canvas
         window.fill(BLACK)
 
@@ -256,22 +269,25 @@ class Pong:
         )
 
         # Detect if there is a winner
+        # TODO - refactor this to send winner a player name
         if self.player_one.score >= MAX_SCORE or self.player_two.score >= MAX_SCORE:
             self.winner(window)
         else:
             pygame.display.update()
 
+    # TODO - refactor winner() - to take a name
     def winner(self, window):
         """Handles writing to the window and resetting the game if a winner is identified.
 
         Args:
             window (pygame.display): The Pong game window.
         """
-
         if self.player_one.score >= MAX_SCORE:
             winning_text = f"{self.player_one.name} has won!"
+            logger.info("Player: %s, has own the game.", self.player_one.name)
         elif self.player_two.score >= MAX_SCORE:
             winning_text = f"{self.player_two.name} has won!"
+            logger.info("Player: %s, has own the game.", self.player_two.name)
 
         text_to_write = self.game_font.render(winning_text, 1, WHITE)
         window.fill(BLACK)
@@ -282,6 +298,7 @@ class Pong:
                 WINDOW_HEIGHT // 2 - text_to_write.get_height() // 2,
             ),
         )
+        logger.info("Resetting player scores.")
         self.player_one.score = 0
         self.player_two.score = 0
         pygame.display.update()
@@ -289,6 +306,7 @@ class Pong:
 
     def reset(self):
         """Resets the paddle and ball positions as well as ball y_velocity. Ball x_velocity is not impacted."""
+        logger.info("Resetting ball and paddles to original positions.")
         self.ball.x_position = self.ball.x_position_original
         self.ball.y_position = self.ball.y_position_original
         self.ball.y_velocity = 0
@@ -301,21 +319,27 @@ class Pong:
         """Handles a goal outcome"""
         if self.ball.x_position < 0:
             self.player_two.score += 1
+            logger.info("Player: %s, has scored. Total score is now: %s", self.player_two.name, self.player_two.score)
             self.reset()
 
         elif self.ball.x_position > WINDOW_WIDTH:
             self.player_one.score += 1
+            logger.info("Player: %s, has scored. Total score is now: %s", self.player_one.name, self.player_one.score)
             self.reset()
 
     def run_game(self):
         """Contains the game loop. Handles window closure."""
         run = True
+        logger.info("Setting the game loop controller run to: %s", run)
+
         while run:
             self.clock.tick(FPS_LIMIT)
+            logger.info("Game loop speed to set FPS: %s", FPS_LIMIT)
             self.draw(GAME_WINDOW)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
+                    logger.info("Game encountered pygame.QUIT signal, game closing.")
                     break
 
             keys = pygame.key.get_pressed()
@@ -340,10 +364,10 @@ def parse_args():
         import logging
 
         logging.getLogger().setLevel(logging.DEBUG)
-        logger.debug("Running the program in debug mode.")
+        logger.debug('Received "--debug" command, running the program in debug mode.')
     if unknown:
         for arg in unknown:
-            logger.info("Unhandled argument %s" % arg)
+            logger.info("Unhandled argument %s", arg)
 
 
 def main():
