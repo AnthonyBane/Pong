@@ -1,10 +1,11 @@
 # Pong
 
-This repository holds two directories and was created to help highlight the differences between code written with poor adherence to Python and OOP standards and code written to better adhere to them.
+This repository holds several directories and has been created to help highlight the difference between poorly written code and code written to adhere to Python and OOP standards. Each directory has a "theme" which partially determines what changes have been made.
 
 The directories are:
 
-* pong_1 - the poorly written script
-* pong_2 - a more optimised script
+* pong_1 - a poorly written script
+* pong_2 - a more optimised, refactored script implementing better Python and OOP standards
+* pong_3 - added logging methods to generate a log file
 
-Note: The second iteration is not intended to be a perfect example of pong, just a refactored and better example compared to iteration 1.
+Note: These are not intended to be perfect examples of pong or of Python/OOP standards, just a series of scripts getting closer to it.
