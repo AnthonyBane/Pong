@@ -334,7 +334,6 @@ class Pong:
 
         while run:
             self.clock.tick(FPS_LIMIT)
-            logger.info("Game loop speed to set FPS: %s", FPS_LIMIT)
             self.draw(GAME_WINDOW)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
