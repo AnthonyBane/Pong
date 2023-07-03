@@ -5,6 +5,7 @@ __version__ = "3.0"
 # TODO - refactor constants to use config file or revert to defaults
 
 import pygame
+from colour import Colour
 from logger_setup import logger
 from paddle import Paddle
 from ball import Ball
@@ -14,10 +15,6 @@ from player import Player
 WINDOW_WIDTH = 600
 WINDOW_HEIGHT = 400
 
-# Defining colour tuples in RGB
-# TODO - refactor colours to ENUM
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
 
 # Game limiting FPS
 FPS_LIMIT = 60
@@ -55,14 +52,14 @@ class Pong:
             y_position=WINDOW_HEIGHT // 2 - PADDLE_HEIGHT // 2,
             width=PADDLE_WIDTH,
             height=PADDLE_HEIGHT,
-            colour=WHITE,
+            colour=Colour.WHITE.RGB(),
         )
         self.paddle_right = Paddle(
             x_position=WINDOW_WIDTH - PADDLE_WIDTH - 10,
             y_position=WINDOW_HEIGHT // 2 - PADDLE_HEIGHT // 2,
             width=PADDLE_WIDTH,
             height=PADDLE_HEIGHT,
-            colour=WHITE,
+            colour=Colour.WHITE.RGB(),
         )
         self.ball = Ball(
             x_position=WINDOW_WIDTH // 2,
@@ -70,7 +67,7 @@ class Pong:
             radius=5,
             x_velocity=5,
             y_velocity=0,
-            colour=WHITE,
+            colour=Colour.WHITE.RGB(),
         )
 
         self.player_one = Player(player_one_name, 0)
@@ -152,7 +149,7 @@ class Pong:
         """
 
         # Reset canvas
-        window.fill(BLACK)
+        window.fill(Colour.BLACK.RGB())
 
         # Draw the paddles
         pygame.draw.rect(
@@ -177,8 +174,8 @@ class Pong:
         )
 
         # Draws the scores
-        score_one_text = self.game_font.render(f"{self.player_one.score}", 1, WHITE)
-        score_two_text = self.game_font.render(f"{self.player_two.score}", 1, WHITE)
+        score_one_text = self.game_font.render(f"{self.player_one.score}", 1, Colour.WHITE.RGB())
+        score_two_text = self.game_font.render(f"{self.player_two.score}", 1, Colour.WHITE.RGB())
         window.blit(score_one_text, (WINDOW_WIDTH // 4 - score_one_text.get_width() // 2, 20))
         window.blit(
             score_two_text,
@@ -214,8 +211,8 @@ class Pong:
             winning_text = f"{self.player_two.name} has won!"
             logger.info("Player: %s, has own the game.", self.player_two.name)
 
-        text_to_write = self.game_font.render(winning_text, 1, WHITE)
-        window.fill(BLACK)
+        text_to_write = self.game_font.render(winning_text, 1, Colour.WHITE.RGB())
+        window.fill(Colour.BLACK.RGB())
         window.blit(
             text_to_write,
             (
