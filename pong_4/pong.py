@@ -15,7 +15,6 @@ from player import Player
 WINDOW_WIDTH = 600
 WINDOW_HEIGHT = 400
 
-
 # Game limiting FPS
 FPS_LIMIT = 60
 
