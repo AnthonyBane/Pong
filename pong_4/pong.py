@@ -4,14 +4,15 @@ __version__ = "3.0"
 
 # TODO - refactor constants to use config file or revert to defaults
 
-from dataclasses import dataclass
 import pygame
 from logger_setup import logger
+from paddle import Paddle
+from ball import Ball
+from player import Player
 
 # Defining window size
 WINDOW_WIDTH = 600
 WINDOW_HEIGHT = 400
-logger.info("Window set to width: %s, and height: %s", WINDOW_WIDTH, WINDOW_HEIGHT)
 
 # Defining colour tuples in RGB
 # TODO - refactor colours to ENUM
@@ -31,83 +32,7 @@ MAX_SCORE = 5
 # Game window and name
 GAME_WINDOW = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Pong")
-
-
-# TODO - add __str__ support
-class Paddle:
-    """Paddle class used to create paddles for the pong game."""
-
-    def __init__(self, x_position, y_position, width, height, colour=WHITE, paddle_velocity=4) -> None:
-        """Paddle class init.
-
-        Args:
-            x_position (int): current x position
-            y_position (int): current y position
-            width (int): width in pixels
-            height (int): height in pixels
-            colour (tuple, optional): paddle fill colour
-            paddle_velocity (int, optional): paddle velocity. Defaults to 4.
-        """
-        self.x_position = x_position
-        self.y_position = self.y_position_original = y_position
-        self.width = width
-        self.height = height
-        self.colour = colour
-        self.paddle_velocity = paddle_velocity
-
-    def move(self, up=True):
-        """Changes the paddle's xy positions.
-
-        Args:
-            up (bool): Signals whether to add or remove the y velocity. Defaults to True.
-        """
-        if up:
-            self.y_position += self.paddle_velocity
-        else:
-            self.y_position -= self.paddle_velocity
-
-
-# TODO - add __str__ support
-class Ball:
-    """Ball class used to create a ball for the ball game."""
-
-    def __init__(
-        self,
-        x_position: int,
-        y_position: int,
-        radius: int,
-        x_velocity: int = 5,
-        y_velocity: int = 0,
-        colour: tuple = WHITE,
-        max_velocity: int = 5,
-    ) -> None:
-        """Ball class init.
-
-        Args:
-            x_position (int): current x position.
-            y_position (int): current y position.
-            radius (int): ball radius in pixels.
-            x_velocity (int, optional): x velocity. Defaults to 5.
-            y_velocity (int, optional): y velocity. Defaults to 0.
-            colour (tuple, optional): ball colour fill. Defaults to WHITE.
-            max_velocity (int, optional): max potential velocity. Defaults to 5.
-        """
-        self.x_position = self.x_position_original = x_position
-        self.y_position = self.y_position_original = y_position
-        self.radius = radius
-        self.x_velocity = x_velocity
-        self.y_velocity = y_velocity
-        self.max_velocity = max_velocity
-        self.colour = colour
-
-
-# TODO - add __str__ support
-@dataclass
-class Player:
-    """Example Player class"""
-
-    name: str
-    score: int = 0
+logger.info("Window set to width: %s, and height: %s", WINDOW_WIDTH, WINDOW_HEIGHT)
 
 
 class Pong:
